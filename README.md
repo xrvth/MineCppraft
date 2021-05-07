@@ -1,10 +1,10 @@
 # MineCppraft
 
 
-### General info
+### _**General info**_
 Minecraft game implemented in c++ using Unreal Engine.
 	
-### Technologies
+### _**Technologies**_
 Project is created with:
 * C++
 * C
