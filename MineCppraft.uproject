@@ -1,0 +1,16 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{00049605-08D8-EAD2-572B-4A44268F183E}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "MineCppraft",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	]
+}
