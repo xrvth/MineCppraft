@@ -93,13 +93,12 @@ void AMineCppraftCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	// Bind fire event
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMineCppraftCharacter::OnFire);
+	// Bind hitting event
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMineCppraftCharacter::OnHit); // click lmb
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AMineCppraftCharacter::EndHit); // release lmb
 
 	// Enable touchscreen input
 	EnableTouchscreenMovement(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AMineCppraftCharacter::OnResetVR);
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMineCppraftCharacter::MoveForward);
@@ -241,6 +240,53 @@ bool AMineCppraftCharacter::EnableTouchscreenMovement(class UInputComponent* Pla
 	return false;
 }
 
+void AMineCppraftCharacter::OnHit()
+{
+	HitAnimation();
+
+	if (CurrentBlock != nullptr)
+	{
+		bIsBreaking = true;
+
+		float TimeBetweenBreaks = ((CurrentBlock->Resistance) / 100.f) / 2; // later 2 will change to *CurrentTool->Power* depending on the tool used
+
+
+		GetWorld()->GetTimerManager().SetTimer(BlockBreakingHandle, this, &AMineCppraftCharacter::BreakBlock, TimeBetweenBreaks, true); // timer to break the block and swing pickaxe
+
+		GetWorld()->GetTimerManager().SetTimer(HitAnimationHandle, this, &AMineCppraftCharacter::HitAnimation, 0.4f, true); // when the character swings the pickaxe, hardcoded 0.4f so charcater swings pickaxe in same pace all the time
+	}
+}
+
+void AMineCppraftCharacter::EndHit()
+{
+	GetWorld()->GetTimerManager().ClearTimer(BlockBreakingHandle);
+
+	GetWorld()->GetTimerManager().ClearTimer(HitAnimationHandle); // release lbm
+
+
+	bIsBreaking = false; // finish breaking the block
+
+
+	if (CurrentBlock != nullptr)
+	{
+		CurrentBlock->ResetBlock();
+	}
+}
+
+void AMineCppraftCharacter::HitAnimation()
+{
+	// try and play a firing animation if specified
+	if (FireAnimation != nullptr)
+	{
+		// Get the animation object for the arms mesh
+		UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance();
+		if (AnimInstance != nullptr)
+		{
+			AnimInstance->Montage_Play(FireAnimation, 1.f);
+		}
+	}
+}
+
 void AMineCppraftCharacter::CheckForBlocks()
 {
 	FHitResult LinetraceHit;
@@ -259,4 +305,12 @@ void AMineCppraftCharacter::CheckForBlocks()
 		return; //exit func if it's not the block
 
 	GEngine->AddOnScreenDebugMessage(0, 2.f, FColor::White, *CurrentBlock->GetName()); //!!needs to be upgraded because looks ugly!! when looking at the block it's tell us block's name
+}
+
+void AMineCppraftCharacter::BreakBlock()
+{
+	if (bIsBreaking && CurrentBlock != nullptr && !CurrentBlock->IsPendingKill())
+	{
+		CurrentBlock->Break();
+	}
 }
