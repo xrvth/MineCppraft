@@ -56,6 +56,8 @@ AMineCppraftCharacter::AMineCppraftCharacter()
 	// Default offset from the character location for projectiles to spawn
 	GunOffset = FVector(100.0f, 0.0f, 10.0f);
 
+	Reach = 250.f;
+
 	// Note: The ProjectileClass and the skeletal mesh/anim blueprints for Mesh1P, FP_WieldedItem, and VR_Gun 
 	// are set in the derived blueprint asset named MyCharacter to avoid direct content references in C++.
 
@@ -103,6 +105,13 @@ void AMineCppraftCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
+}
+
+void AMineCppraftCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	CheckForBlocks();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -297,4 +306,24 @@ bool AMineCppraftCharacter::EnableTouchscreenMovement(class UInputComponent* Pla
 	}
 	
 	return false;
+}
+
+void AMineCppraftCharacter::CheckForBlocks()
+{
+	FHitResult LinetraceHit;
+
+	FVector StartTrace = FirstPersonCameraComponent->GetComponentLocation(); //ray cast start
+	FVector EndTrace = (FirstPersonCameraComponent->GetForwardVector() * Reach) + StartTrace; //ray cast end, reach says how far can the player reach
+
+	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActor(this); //'this' refers to the player, so the ray cast ignores the player
+
+	GetWorld()->LineTraceSingleByChannel(LinetraceHit, StartTrace, EndTrace, ECollisionChannel::ECC_WorldDynamic, CQP);
+
+	CurrentBlock = Cast<ABlock>(LinetraceHit.GetActor());
+
+	if (CurrentBlock == nullptr)
+		return; //exit func if it's not the block
+
+	GEngine->AddOnScreenDebugMessage(0, 2.f, FColor::Red, *CurrentBlock->GetName()); //!!needs to be upgraded because looks ugly!! when looking at the block it's tell us block's name
 }

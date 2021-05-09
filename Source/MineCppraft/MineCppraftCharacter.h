@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
+#include "Block.h"
 #include "GameFramework/Character.h"
 #include "MineCppraftCharacter.generated.h"
 
@@ -56,6 +57,8 @@ public:
 
 protected:
 	virtual void BeginPlay();
+
+	virtual void Tick(float DeltaTime) override;
 
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
@@ -137,6 +140,17 @@ protected:
 	 * @returns true if touch controls were enabled.
 	 */
 	bool EnableTouchscreenMovement(UInputComponent* InputComponent);
+
+private:
+	
+	// Check if a block is in front //
+	void CheckForBlocks();
+
+	//Var that stores the block being looked at atm//
+	ABlock* CurrentBlock;
+
+	//How far the character can reach//
+	float Reach;
 
 public:
 	/** Returns Mesh1P subobject **/
