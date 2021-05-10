@@ -1,6 +1,8 @@
 # MineCppraft
 
-![Current State](https://raw.githubusercontent.com/xrvth/MineCppraft/main/ImagesSource/Gifs/210510_v1.gif)
+
+<img src="https://raw.githubusercontent.com/xrvth/MineCppraft/main/ImagesSource/Gifs/210510_v1.gif" width="653" height="308"/>
+
 
 ### _**General info**_
 Minecraft game implemented in c++ using Unreal Engine.
